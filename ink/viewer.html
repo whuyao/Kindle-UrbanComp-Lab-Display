@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>UrbanComp Ink</title>
+<style>
+html,body{margin:0;padding:0;background:#fff;color:#000;width:100%;height:100%;overflow:hidden}
+#page{display:block;border:0;max-width:100%;max-height:100%;margin:0 auto}
+#help{position:absolute;left:7%;top:40%;width:86%;font:24px/1.7 sans-serif}
+#notice{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #000;font:16px/1.5 sans-serif;text-align:center}
+#controls{display:none;position:absolute;left:4%;right:4%;bottom:5%;padding:20px;border:2px solid #000;background:white;font:22px/1.8 sans-serif}
+button,a{font:inherit;color:#000;background:#fff;padding:10px;border:1px solid #000;display:inline-block}
+</style></head><body>
+<img id="page" alt="UrbanComp 科研信息屏" style="visibility:hidden">
+<div id="help">UrbanComp / Ink<br>正在读取科研内容…</div>
+<div id="notice" style="display:none"></div>
+<div id="controls"><a href="/reading.html">阅读全文</a> <button onclick="closeControls()">返回</button></div>
+<script>
+// ES5 only, for the PW2's old WebKit. No framework, canvas, fonts, animations or WebSockets.
+var current='', busy=false, pending=null, timer=null, stopped=false;
+var page=document.getElementById('page'), help=document.getElementById('help');
+var notice=document.getElementById('notice'), controls=document.getElementById('controls');
+function viewport(){
+ if(!/Kindle|Silk/i.test(navigator.userAgent))return {w:758,h:1024};
+ return {w:Math.max(400,Math.min(1200,window.innerWidth||document.documentElement.clientWidth)),h:Math.max(500,Math.min(1600,window.innerHeight||document.documentElement.clientHeight))};
+}
+function showNotice(t){if(notice.innerHTML!==t){notice.innerHTML=t;notice.style.display=t?'block':'none';}}
+function closeControls(){controls.style.display='none';}
+page.onclick=function(){controls.style.display='block';};
+function poll(){
+ if(busy||pending||stopped)return;busy=true;
+ var v=viewport(), xhr=new XMLHttpRequest();
+ xhr.open('GET','/status?w='+v.w+'&h='+v.h,true);xhr.timeout=100000;
+ xhr.onreadystatechange=function(){
+  if(xhr.readyState!==4)return;
+  busy=false;
+  if(xhr.status!==200){showNotice('连接暂不可用 · 保留上一版');return;}
+  var s;try{s=JSON.parse(xhr.responseText);}catch(e){showNotice('内容暂不可用 · 保留上一版');return;}
+  if(s.stale){showNotice('上游暂不可用 · 保留上一版');}else{showNotice('');}
+  if(!s.version)return;
+  if(s.version===current)return;
+  // Decode a new image completely before swapping. A failed request never blanks the last good page.
+  var next=new Image();pending=next;
+  next.onload=function(){page.src=next.src;page.style.visibility='visible';help.style.display='none';current=s.version;pending=null;};
+  next.onerror=function(){pending=null;showNotice('画面下载失败 · 保留上一版');};
+  next.src='/screen.png?v='+encodeURIComponent(s.version)+'&w='+v.w+'&h='+v.h;
+ };
+ xhr.onerror=function(){busy=false;showNotice('连接暂不可用 · 保留上一版');};
+ xhr.ontimeout=xhr.onerror;xhr.send(null);
+}
+window.onresize=function(){current='';poll();};
+window.onpageshow=function(){poll();};
+poll();timer=setInterval(poll,1800000);
+</script></body></html>

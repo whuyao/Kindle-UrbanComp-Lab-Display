@@ -1,0 +1,30 @@
+name: Test and build PW2 package
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.12'
+          cache-dependency-path: native/app/go.sum
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt
+      - run: python -m unittest discover -s tests -v
+      - run: python -m unittest discover -s native/tests -v
+      - run: python native/build.py
+      - run: go test -race ./...
+        working-directory: native/app
+      - run: python native/analyze_metrics.py docs/validation/26h
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Kindle-UrbanComp-Lab-Display-pw2
+          path: dist/Kindle-UrbanComp-Lab-Display-pw2.zip

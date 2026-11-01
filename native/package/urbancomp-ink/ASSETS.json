@@ -1,0 +1,17 @@
+[
+  {
+    "file": "SourceHanSansCN-Regular.otf",
+    "sha256": "e2bc8a2e7f37474b774fff8db758681ece40bb6947a90d571bce9dd60671a8e4",
+    "url": "https://raw.githubusercontent.com/adobe-fonts/source-han-sans/release/SubsetOTF/CN/SourceHanSansCN-Regular.otf"
+  },
+  {
+    "file": "SourceHanSerifCN-Regular.otf",
+    "sha256": "3754ea669c530e2473354f8f6d9f79680a44d7e26ec7d00eeabee4a7e0753c5d",
+    "url": "https://raw.githubusercontent.com/adobe-fonts/source-han-serif/release/SubsetOTF/CN/SourceHanSerifCN-Regular.otf"
+  },
+  {
+    "file": "cacert.pem",
+    "sha256": "796f1389bfea13c0ed78f663b765baaff54a508e5483786bd6ece73c5e3e3cbe",
+    "url": "https://curl.se/ca/cacert.pem"
+  }
+]
